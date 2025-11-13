@@ -15,7 +15,7 @@
                 <div class="relative" @mouseenter="openMenu('company')" @mouseleave="closeMenuWithDelay">
                     <RouterLink to="/company" class="flex items-center gap-1 hover:text-yellow-500 transition"
                         :class="{ 'text-yellow-500 font-semibold': route.path.startsWith('/company') }">
-                        미네르바에듀듀
+                        미네르바에듀듀듀
                         <svg class="w-3 h-3 mt-[1px]" viewBox="57 35.171 26 16.043" fill="currentColor">
                             <path d="M57.5,38.193l12.5,12.5l12.5-12.5l-2.5-2.5l-10,10l-10-10L57.5,38.193z" />
                         </svg>
