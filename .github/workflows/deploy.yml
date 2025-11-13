@@ -2,7 +2,7 @@ name: Auto Deploy (Self-hosted Runner)
 
 on:
   push:
-    branches: ["main"]
+    branches: ["master"]
 
 jobs:
   deploy:
@@ -20,7 +20,7 @@ jobs:
     - name: Git Pull (fetch latest code)
       run: |
         cd /var/www/minerva-clone
-        git pull origin main
+        git pull origin master
 
     - name: Install Node modules
       run: |
