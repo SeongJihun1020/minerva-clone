@@ -9,7 +9,7 @@
 
                 <RouterLink to="/" class="hover:text-yellow-500 transition"
                     :class="{ 'text-yellow-500 font-semibold': route.path === '/' }">
-                    HOMEE
+                    HOME
                 </RouterLink>
 
                 <div class="relative" @mouseenter="openMenu('company')" @mouseleave="closeMenuWithDelay">
