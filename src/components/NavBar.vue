@@ -5,7 +5,7 @@
                 <img src="@/assets/logo.png" alt="MINERVA EDU Inc." class="h-10 w-auto" />
 
             </RouterLink>
-            <nav class="flex items-center space-x-10 text-gray-600 font-medium text-[15px]">
+            <nav class="flex items-center space-x-10 text-gray-600 font-medium text-[15px] whitespace-nowrap overflow-x-auto">
 
                 <RouterLink to="/" class="hover:text-yellow-500 transition"
                     :class="{ 'text-yellow-500 font-semibold': route.path === '/' }">
