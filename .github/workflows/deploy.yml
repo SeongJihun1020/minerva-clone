@@ -50,7 +50,7 @@ jobs:
 
           echo "[$i] HTTP status: $STATUS_CODE"
 
-          if [ "$STATUS_CODE" -eq 200]; then
+          if [ "$STATUS_CODE" -eq 200 ]; then
             echo "Health check success"
             exit 0
           fi
