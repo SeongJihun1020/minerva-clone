@@ -40,7 +40,7 @@ jobs:
 
     - name: Health Check (after deploy)
       run: |
-        URL="http://127.0.0.1"
+        URL="http://13.124.226.51"
 
         echo "Start health check for $URL"
 
