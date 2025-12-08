@@ -37,3 +37,27 @@ jobs:
         rm -rf /var/www/html/*
         cp -r /var/www/minerva-clone/dist/* /var/www/html/
         echo "Deployment completed!"
+
+    - name: Health Check (after deploy)
+      run: |
+        URL="http://127.0.0.1"
+
+        echo "Start health check for $URL"
+
+        for i in {1..10}
+        do
+          STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" "$URL" || echo "000")
+
+          echo "[$i] HTTP status: $STATUS_CODE"
+
+          if [ "$STATUS_CODE" -eq 200]; then
+            echo "Health check success"
+            exit 0
+          fi
+
+          echo "Health check failed, retry in 3 seconds..."
+          sleep 3
+        done
+
+        echo "Health check failed after multiple retries. Marking deploy as FAILED."
+        exit 1
