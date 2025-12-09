@@ -115,4 +115,4 @@ jobs:
           exit 1
         fi
 
-        echo "Health check passed. Deploy completed successfully."
+        echo "Health check passed. Deploy completed successfully"
