@@ -32,32 +32,87 @@ jobs:
         cd /var/www/minerva-clone
         npm run build
 
-    - name: Deploy to NGINX folder
+    - name: Blue-Green Deploy
       run: |
-        rm -rf /var/www/html/*
-        cp -r /var/www/minerva-clone/dist/* /var/www/html/
-        echo "Deployment completed!"
+        set -e
 
-    - name: Health Check (after deploy)
+        BASE="/var/www"
+        CURRENT_LINK="$BASE/html"
+        BLUE="$BASE/html_blue"
+        GREEN="$BASE/html_green"
+
+        mkdir -p "$BLUE" "$GREEN"
+
+        if [ -L "$CURRENT_LINK" ]; then
+          CURRENT_TARGET=$(readlink "$CURRENT_LINK")
+        else
+          CURRENT_TARGET="$BLUE"
+          ln -sfn "$CURRENT_TARGET" "$CURRENT_LINK"
+        fi
+
+        echo "Current target: $CURRENT_TARGET"
+
+        if [ "$CURRENT_TARGET" = "$BLUE" ]; then
+          TARGET="$GREEN"
+        else
+          TARGET="$BLUE"
+        fi
+
+        echo "Deploy target: $TARGET"
+
+        echo "$CURRENT_TARGET" > "$BASE/previous_target"
+        echo "$TARGET" > "$BASE/deployed_target"
+
+        rm -rf "$TARGET"/*
+        cp -r /var/www/minerva-clone/dist/* "$TARGET"/
+
+        echo "New build copied to $TARGET"
+
+        ln -sfn "$TARGET" "$CURRENT_LINK"
+        echo "Switched current link to $TARGET"
+
+    - name: Health Check & Rollback if needed
       run: |
+        set -e
+
+        BASE="/var/www"
+        CURRENT_LINK="$BASE/html"
+
         URL="http://13.124.226.51"
 
         echo "Start health check for $URL"
 
+        PREVIOUS_TARGET=$(cat "$BASE/previous_target")
+        DEPLOYED_TARGET=$(cat "$BASE/deployed_target")
+
+        echo "Previous target: $PREVIOUS_TARGET"
+        echo "Deployed target: $DEPLOYED_TARGET"
+        echo "Current link: $(readlink "$CURRENT_LINK")"
+
+        SUCCESS=0
+
         for i in {1..10}
         do
           STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" "$URL" || echo "000")
-
           echo "[$i] HTTP status: $STATUS_CODE"
 
-          if [ "$STATUS_CODE" -eq 200 ]; then
+          if [ "$STATUS_CODE" -ge 200 ] && [ "$STATUS_CODE" -lt 400 ]; then
             echo "Health check success"
-            exit 0
+            SUCCESS=1
+            break
           fi
 
           echo "Health check failed, retry in 3 seconds..."
           sleep 3
         done
 
-        echo "Health check failed after multiple retries. Marking deploy as FAILED."
-        exit 1
+        if [ "$SUCCESS" -ne 1 ]; then
+          echo "Health check failed after multiple retries. Rolling back..."
+
+          ln -sfn "$PREVIOUS_TARGET" "$CURRENT_LINK"
+          echo "Rolled back current link to $PREVIOUS_TARGET"
+
+          exit 1
+        fi
+
+        echo "Health check passed. Deploy completed successfully."
